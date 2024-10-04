@@ -1,20 +1,29 @@
 package main
 
 import (
-	"go.uber.org/fx"
-	"tickets/internal"
+	"github.com/gin-gonic/gin"
+	"tickets/internal/application/usecases"
+	"tickets/internal/handlers"
+	"tickets/internal/repositories"
 	"tickets/internal/server"
 )
 
 func main() {
+	engine := gin.Default()
 
-	fx.New(
-		internal.Module,
-		fx.Invoke(bootstrap),
-	)
+	httpHandlers := buildHttpHandlers()
+	server.DefineRoutes(engine, httpHandlers)
+
+	err := engine.Run()
+	if err != nil {
+		return
+	}
 }
 
-func bootstrap(server *server.GinWebServers) {
-	_, runServer := server.CreateServer()
-	runServer()
+func buildHttpHandlers() *handlers.HttpHandlers {
+	userRepository := repositories.NewUserRepository()
+	useUseCase := usecases.NewUserUseCase(userRepository)
+
+	UserHandler := handlers.NewUserHandler(useUseCase)
+	return handlers.NewHttpHandlers(*UserHandler)
 }

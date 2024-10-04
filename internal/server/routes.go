@@ -2,19 +2,18 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
-	"tickets/internal/handlers/observability"
+	"tickets/internal/handlers"
 )
 
-type RoutesController struct {
-	observabilityController *observability.Controller
-}
+func DefineRoutes(engine *gin.Engine, handlers *handlers.HttpHandlers) {
+	engine.GET("/check", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "pong",
+		})
+	})
 
-func NewRoutesController(
-	observabilityController *observability.Controller,
-) *RoutesController {
-	return &RoutesController{observabilityController: observabilityController}
-}
-
-func (r RoutesController) Define(server *gin.Engine) {
-	server.GET("/check", r.observabilityController.HealthCheck)
+	engine.GET("/users/:uuid", handlers.UserHandler.GetUser)
+	engine.POST("/users", handlers.UserHandler.CreateUser)
+	engine.PUT("/users/:uuid", handlers.UserHandler.UpdateUser)
+	engine.DELETE("/users/:uuid", handlers.UserHandler.DeleteUser)
 }

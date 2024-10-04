@@ -1,9 +1,11 @@
 package handlers
 
-import (
-	"go.uber.org/fx"
-	"tickets/internal/handlers/observability"
-)
+type HttpHandlers struct {
+	UserHandler UserHandler
+}
 
-var Module = fx.Options(
-	fx.Provide(observability.NewObservabilityController))
+func NewHttpHandlers(userHandler UserHandler) *HttpHandlers {
+	return &HttpHandlers{
+		UserHandler: userHandler,
+	}
+}
