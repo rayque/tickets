@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"net/http"
 	"tickets/internal/application/interfaces"
 	"tickets/internal/domain/entities"
+	"tickets/internal/utils"
 )
 
 type UserHandler struct {
@@ -24,7 +26,17 @@ func (u *UserHandler) CreateUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	err := u.userUseCase.Create(ctx, user)
+
+	password, err := utils.GenerateHashPassword(user.Password)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	user.Uuid = uuid.New().String()
+	user.Password = password
+
+	err = u.userUseCase.Create(ctx, user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
